@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Visitor Sign In / Sign Out</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root { --brand: #0f7bff; --accent: #ff5a5f; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 0; background: #f7f7f9; color: #222; }
+    .wrap { max-width: 720px; margin: 5rem auto; padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    h1 { font-size: 1.9rem; margin: 0 0 1rem; }
+    p { margin: 0.5rem 0 2rem; color: #555; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .btn { display: inline-block; text-align: center; text-decoration: none; font-weight: 700; padding: 1.2rem; border-radius: 10px; }
+    .in { background: var(--brand); color: #fff; }
+    .out { background: var(--accent); color: #fff; }
+    .note { margin-top: 2rem; font-size: 0.95rem; color: #666; }
+    .footer { margin-top: 1rem; font-size: 0.85rem; color: #888; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Visitors: Scan to Sign In / Out</h1>
+    <p>Please choose an option below. This page is designed for external access.</p>
+    <div class="grid">
+      <a class="btn in" href="https://forms.office.com/Pages/ResponsePage.aspx?id=Y0pBxaTNmkyLXWXJZrRNyzRw36luX8lKmYafkHO9O1xUOUs2TUZOWERDNjFOSUdHS05PUkpUN0NETy4u" target="_blank" rel="noopener">Sign In</a>
+      <a class="btn out" href="https://forms.office.com/Pages/ResponsePage.aspx?id=Y0pBxaTNmkyLXWXJZrRNyzRw36luX8lKmYafkHO9O1xUQkJYRURLODJSN0QyRjRYSkZZTTVHMk1QMi4u" target="_blank" rel="noopener">Sign Out</a>
+    </div>
+    <p class="note">By proceeding, you consent to your details being used for visitor management and safety. Data may be retained for up to 90 days.</p>
+    <div class="footer">Contact reception if you experience issues.</div>
+  </main>
+</body>
+</html>
