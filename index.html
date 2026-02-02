@@ -28,8 +28,48 @@
   Sign Out
 </a>
     </div>
+     <h2 style="margin-top:2rem;">Quick Sign Out</h2>
+    <p>Select your name from the list below.</p>
+
+    <select id="visitorList" style="width:100%; padding:1rem; font-size:1rem; border-radius:8px; border:1px solid #ccc;">
+      <option>Loading signed-in visitors…</option>
+    </select>
+
+    <button onclick="signOut()" class="btn out" style="width:100%; margin-top:1rem;">
+      Sign Out
+    </button>
+
+    <p id="msg" style="margin-top:1rem; font-weight:600;"></p>
     <p class="note">By proceeding, you consent to your details being used for visitor management and safety. Data may be retained for up to 90 days.</p>
     <div class="footer">Contact reception if you experience issues.</div>
   </main>
 </body>
+  <script>
+const apiUrl = "https://defaultc5414a63cda44c9a8b5d65c966b44d.cb.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/51d1fc2213f647fd86bd33b0c1a90c8f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=SU5hGI55ThOvK5-5H48juhtTlNSgJTg4ikBeNmm5lFs";
+
+fetch(apiUrl + "?mode=list")
+  .then(r => r.json())
+  .then(data => {
+    const ddl = document.getElementById("visitorList");
+    ddl.innerHTML = "";
+    data.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.id;
+      opt.text = `${v.name} – ${v.org}`;
+      ddl.appendChild(opt);
+    });
+  });
+
+function signOut() {
+  const id = document.getElementById("visitorList").value;
+
+  fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id })
+  })
+  .then(r => r.text())
+  .then(t => document.getElementById("msg").innerText = t);
+}
+</script>
 </html>
