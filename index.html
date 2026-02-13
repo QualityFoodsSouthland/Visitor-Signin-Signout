@@ -26,7 +26,7 @@
     <p>Please choose an option below. This page is designed for external access.</p>
     <div class="grid">
       <a class="btn in" href="https://forms.office.com/Pages/ResponsePage.aspx?id=Y0pBxaTNmkyLXWXJZrRNyzRw36luX8lKmYafkHO9O1xUOUs2TUZOWERDNjFOSUdHS05PUkpUN0NETy4u" target="_blank" rel="noopener">Sign In</a>
-      <!-- Old PowerApps Sign Out link removed -->
+      <!-- Remove old PowerApps Sign Out link -->
     </div>
 
     <h2 style="margin-top:2rem;">Quick Sign Out</h2>
@@ -44,71 +44,59 @@
   </main>
 
   <script>
-    // Replace this URL with your Power Automate Flow webhook URL
-    const FLOW_WEBHOOK_URL = "https://prod-XX.westus.logic.azure.com:443/workflows/.../triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=XXXX";
+    // Replace with the URL to your signedin.json file in SharePoint
+    const VISITORS_JSON_URL = "https://qfs.sharepoint.com/Lists/Sign%20In%20or%20Out/AllItems.aspx?env=WebViewList";
 
-    // Function to fetch currently signed-in users and populate dropdown
-    function loadVisitors() {
-      fetch(FLOW_WEBHOOK_URL + "?mode=list")
-        .then(r => r.json())
-        .then(data => {
-          const ddl = document.getElementById("visitorList");
-          ddl.innerHTML = ""; // Clear old options
-          if (data.length === 0) {
+    // Fetch currently signed-in visitors and populate dropdown
+    async function loadVisitors() {
+      try {
+        const res = await fetch(VISITORS_JSON_URL);
+        const data = await res.json();
+        const ddl = document.getElementById("visitorList");
+        ddl.innerHTML = ""; // Clear old options
+
+        if (!data || data.length === 0) {
+          const opt = document.createElement("option");
+          opt.text = "No visitors currently signed in";
+          opt.value = "";
+          ddl.appendChild(opt);
+        } else {
+          const placeholder = document.createElement("option");
+          placeholder.text = "Select your name";
+          placeholder.value = "";
+          ddl.appendChild(placeholder);
+
+          data.forEach(v => {
             const opt = document.createElement("option");
-            opt.text = "No visitors currently signed in";
-            opt.value = "";
+            opt.value = v.Title; // visitor name
+            opt.text = v.Title + (v.Company ? " – " + v.Company : "");
             ddl.appendChild(opt);
-          } else {
-            const placeholder = document.createElement("option");
-            placeholder.text = "Select your name";
-            placeholder.value = "";
-            ddl.appendChild(placeholder);
-
-            data.forEach(v => {
-              const opt = document.createElement("option");
-              opt.value = v.id; // ID from SharePoint
-              opt.text = `${v.name} – ${v.org || ""}`;
-              ddl.appendChild(opt);
-            });
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          const ddl = document.getElementById("visitorList");
-          ddl.innerHTML = "<option>Error loading visitors</option>";
-        });
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        const ddl = document.getElementById("visitorList");
+        ddl.innerHTML = "<option>Error loading visitors</option>";
+      }
     }
 
     // Call loadVisitors on page load
     loadVisitors();
-
     // Optional: refresh list every 30 seconds
     setInterval(loadVisitors, 30000);
 
+    // Sign out via email to trigger Power Automate flow
     function signOut() {
       const ddl = document.getElementById("visitorList");
-      const id = ddl.value;
-      if (!id) { alert("Please select your name"); return; }
+      const name = ddl.value;
+      if (!name) { alert("Please select your name"); return; }
 
-      document.getElementById("msg").innerText = "Signing out…";
+      const mailto = "mailto:visitors@qfs.co.nz?subject=Sign%20Out&body=" + encodeURIComponent(name);
+      window.location.href = mailto;
 
-      fetch(FLOW_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id })
-      })
-      .then(res => res.text())
-      .then(msg => {
-        document.getElementById("msg").innerText = msg;
-        ddl.disabled = true; // prevent double submission
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById("msg").innerText = "Error signing out. Please try again.";
-      });
+      document.getElementById("msg").innerText = "Opening email to sign you out…";
+      ddl.disabled = true; // prevent double submission
     }
   </script>
 </body>
 </html>
->
