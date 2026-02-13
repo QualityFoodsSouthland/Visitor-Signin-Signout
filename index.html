@@ -26,7 +26,6 @@
     <p>Please choose an option below. This page is designed for external access.</p>
     <div class="grid">
       <a class="btn in" href="https://forms.office.com/Pages/ResponsePage.aspx?id=Y0pBxaTNmkyLXWXJZrRNyzRw36luX8lKmYafkHO9O1xUOUs2TUZOWERDNjFOSUdHS05PUkpUN0NETy4u" target="_blank" rel="noopener">Sign In</a>
-      <!-- Remove old PowerApps Sign Out link -->
     </div>
 
     <h2 style="margin-top:2rem;">Quick Sign Out</h2>
@@ -44,59 +43,71 @@
   </main>
 
   <script>
-    // Replace with the URL to your signedin.json file in SharePoint
-    const VISITORS_JSON_URL = "https://qfs.sharepoint.com/Lists/Sign%20In%20or%20Out/AllItems.aspx?env=WebViewList";
+    // Replace this URL with the direct SharePoint link to your signedin.json file
+    const SIGNED_IN_JSON_URL = "https://qfs.sharepoint.com/sites/YOUR_SITE/Shared Documents/signedin.json";
 
-    // Fetch currently signed-in visitors and populate dropdown
+    // Load the currently signed-in visitors
     async function loadVisitors() {
-      try {
-        const res = await fetch(VISITORS_JSON_URL);
-        const data = await res.json();
-        const ddl = document.getElementById("visitorList");
-        ddl.innerHTML = ""; // Clear old options
+      const ddl = document.getElementById("visitorList");
+      ddl.innerHTML = "<option>Loading signed-in visitors…</option>";
 
+      try {
+        const response = await fetch(SIGNED_IN_JSON_URL);
+        const data = await response.json();
+
+        ddl.innerHTML = "";
         if (!data || data.length === 0) {
           const opt = document.createElement("option");
           opt.text = "No visitors currently signed in";
           opt.value = "";
           ddl.appendChild(opt);
-        } else {
-          const placeholder = document.createElement("option");
-          placeholder.text = "Select your name";
-          placeholder.value = "";
-          ddl.appendChild(placeholder);
-
-          data.forEach(v => {
-            const opt = document.createElement("option");
-            opt.value = v.Title; // visitor name
-            opt.text = v.Title + (v.Company ? " – " + v.Company : "");
-            ddl.appendChild(opt);
-          });
+          return;
         }
+
+        const placeholder = document.createElement("option");
+        placeholder.text = "Select your name";
+        placeholder.value = "";
+        ddl.appendChild(placeholder);
+
+        data.forEach(visitor => {
+          const opt = document.createElement("option");
+          opt.value = visitor.Title; // or an ID if you have one
+          opt.text = visitor.Title;
+          ddl.appendChild(opt);
+        });
       } catch (err) {
         console.error(err);
-        const ddl = document.getElementById("visitorList");
         ddl.innerHTML = "<option>Error loading visitors</option>";
       }
     }
 
-    // Call loadVisitors on page load
+    // Call loadVisitors on page load and refresh every 30 seconds
     loadVisitors();
-    // Optional: refresh list every 30 seconds
     setInterval(loadVisitors, 30000);
 
-    // Sign out via email to trigger Power Automate flow
     function signOut() {
       const ddl = document.getElementById("visitorList");
       const name = ddl.value;
       if (!name) { alert("Please select your name"); return; }
 
-      const mailto = "mailto:visitors@qfs.co.nz?subject=Sign%20Out&body=" + encodeURIComponent(name);
-      window.location.href = mailto;
-
-      document.getElementById("msg").innerText = "Opening email to sign you out…";
-      ddl.disabled = true; // prevent double submission
+      // This is where you would call your Power Automate sign-out webhook
+      // Example:
+      fetch("YOUR_SIGNOUT_FLOW_WEBHOOK_URL", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      })
+      .then(res => res.text())
+      .then(msg => {
+        document.getElementById("msg").innerText = "Signed out: " + name;
+        ddl.disabled = true; // prevent double submission
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("msg").innerText = "Error signing out. Please try again.";
+      });
     }
   </script>
 </body>
 </html>
+
