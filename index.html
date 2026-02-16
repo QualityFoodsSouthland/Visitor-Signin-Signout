@@ -16,100 +16,36 @@
     .out { background: var(--accent); color: #fff; }
     .note { margin-top: 2rem; font-size: 0.95rem; color: #666; }
     .footer { margin-top: 1rem; font-size: 0.85rem; color: #888; }
-    select, button { width: 100%; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; margin-top: 0.5rem; }
-    button { background: var(--accent); color: #fff; border: none; cursor: pointer; }
   </style>
 </head>
+
 <body>
   <main class="wrap">
     <h1>Visitors: Scan to Sign In / Out</h1>
     <p>Please choose an option below. This page is designed for external access.</p>
+
     <div class="grid">
-      <!-- Your Microsoft Form Sign In URL -->
-      <a class="btn in" href="https://forms.office.com/Pages/ResponsePage.aspx?id=Y0pBxaTNmkyLXWXJZrRNyzRw36luX8lKmYafkHO9O1xUOUs2TUZOWERDNjFOSUdHS05PUkpUN0NETy4u" target="_blank" rel="noopener">Sign In</a>
+      <!-- SIGN IN -->
+      <a class="btn in" 
+         href="https://forms.office.com/Pages/ResponsePage.aspx?id=Y0pBxaTNmkyLXWXJZrRNyzRw36luX8lKmYafkHO9O1xUOUs2TUZOWERDNjFOSUdHS05PUkpUN0NETy4u" 
+         target="_blank" rel="noopener">
+        Sign In
+      </a>
+
+      <!-- SIGN OUT -->
+      <a class="btn out" 
+         href="https://forms.office.com/Pages/ResponsePage.aspx?id=Y0pBxaTNmkyLXWXJZrRNyzRw36luX8lKmYafkHO9O1xUQkJYRURLODJSN0QyRjRYSkZZTTVHMk1QMi4u" 
+         target="_blank" rel="noopener">
+        Sign Out
+      </a>
     </div>
 
-    <h2 style="margin-top:2rem;">Quick Sign Out</h2>
-    <p>Select your name from the list below:</p>
+    <p class="note">
+      By proceeding, you consent to your details being used for visitor management and safety.  
+      Data may be retained for up to 90 days.
+    </p>
 
-    <select id="visitorList">
-      <option>Loading signed-in visitors…</option>
-    </select>
-
-    <button id="signOutBtn">Sign Out</button>
-
-    <p id="msg" style="margin-top:1rem; font-weight:600;"></p>
-    <p class="note">By proceeding, you consent to your details being used for visitor management and safety. Data may be retained for up to 90 days.</p>
     <div class="footer">Contact reception if you experience issues.</div>
   </main>
-
-  <script>
-    // Raw GitHub URL for signedin.json
-    const SIGNED_IN_JSON_URL = "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/signedin.json";
-
-    // Your Power Automate sign out webhook
-    const SIGNOUT_FLOW_WEBHOOK_URL = "YOUR_POWER_AUTOMATE_SIGNOUT_WEBHOOK_URL";
-
-    async function loadVisitors() {
-      const ddl = document.getElementById("visitorList");
-      ddl.innerHTML = "<option>Loading signed-in visitors…</option>";
-      try {
-        const res = await fetch(SIGNED_IN_JSON_URL);
-        const data = await res.json();
-
-        ddl.innerHTML = "";
-        if (!data || data.length === 0) {
-          ddl.innerHTML = "<option>No visitors currently signed in</option>";
-          return;
-        }
-
-        const placeholder = document.createElement("option");
-        placeholder.value = "";
-        placeholder.text = "Select your name";
-        ddl.appendChild(placeholder);
-
-        data.forEach(visitor => {
-          const opt = document.createElement("option");
-          opt.value = visitor.Title;  // Or ID if you prefer
-          opt.text = visitor.Title;
-          ddl.appendChild(opt);
-        });
-      } catch (err) {
-        console.error(err);
-        ddl.innerHTML = "<option>Error loading visitors</option>";
-      }
-    }
-
-    async function signOut() {
-      const ddl = document.getElementById("visitorList");
-      const name = ddl.value;
-      if (!name) { alert("Please select your name"); return; }
-
-      document.getElementById("msg").innerText = "Signing out…";
-
-      try {
-        const res = await fetch(SIGNOUT_FLOW_WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name })
-        });
-
-        if (!res.ok) throw new Error("Network response was not OK");
-        document.getElementById("msg").innerText = `Signed out: ${name}`;
-        ddl.disabled = true;
-      } catch (err) {
-        console.error(err);
-        document.getElementById("msg").innerText = "Error signing out. Please try again.";
-      }
-    }
-
-    document.getElementById("signOutBtn").addEventListener("click", signOut);
-
-    loadVisitors();
-    setInterval(loadVisitors, 30000); // Refresh every 30s
-  </script>
 </body>
 </html>
-
-
-
